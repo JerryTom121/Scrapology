@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Scrapology</title>
+    </head>
+    <body>
+        <div>
+            <h1><a href="/">Scrapology</a></h1>
+        </div>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <div>
+            <ul>
+                <li><h1>Username : {{ user.username }}</h1></li>
+                <li><h1>Full Name : {{ user.full_name }}</h1></li>
+                <li><h1>Bio : {{ user.bio }}</h1></li>
+                <li><h1>Location : {{ user.location }}</h1></li>
+                <li><h1>Joined Since : {{ user.joined_date }}</h1></li>
+                <li><h1>Personal URL : {{ user.personal_url }}</h1></li>
+                <li><h1>Tweets : {{ user.nbTweets }}</h1></li>
+                <li><h1>Followers : {{ user.nbFollowers }}</h1></li>
+                <li><h1>Following : {{ user.nbFollowing }}</h1></li>
+                <li><h1>Likes : {{ user.nbLikes }}</h1></li>
+            </ul>
+        </div>
+    </body>
+</html>
