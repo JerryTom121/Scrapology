@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -72,7 +71,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'scrapology.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
@@ -103,13 +101,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Global settings for a REST framework API
-REST_FRAMEWORK = {
+#REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}
+ #   'DEFAULT_PERMISSION_CLASSES': [
+  #      'rest_framework.permissions.DjangoModelPermissions'
+   # ]
+#}
 
 
 # Internationalization
