@@ -17,7 +17,7 @@ URL: http://localhost:8000/twusers/Username [Method GET]<br><br>
 URL: http://localhost:8000/twusers/ [Method GET]<br><br>
 
 2. *__User Tweets__* [Done]
-   * Download the latest 3420 tweets of a given Twitter user identified by his username (handle). Twitter only allows access to a users most recent 3240 tweets through its API. I used [Tweepy]: http://www.tweepy.org which is Python wrapper for Twitter API.<br><br>
+   * Download the latest 3420 tweets of a given Twitter user identified by his username (handle). Twitter only allows access to a users most recent 3240 tweets through its API. I used <a href="http://www.tweepy.org" target="_blank" style="text-decoration:none"> Tweepy </a> which is Python wrapper for Twitter API.<br><br>
    * Require that the user profile is scrapped and saved in the DB first, deletes the corresponding tweets in the DB if they exist, scrap the latest ones and save in the DB.<br><br>
 URL: http://localhost:8000/twusers/Username/tweets [Method POST]<br><br>   
    * Retrieve the user tweets from the DB if they exist<br><br>
