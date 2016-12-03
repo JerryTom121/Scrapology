@@ -1,14 +1,14 @@
-from django.contrib import messages
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from tweepy import TweepError
 
-from .forms import TwForm
+from .models import Twitter_Tweet
 from .models import Twitter_User
+from .scrapTwitter import getLatestTweets
 from .scrapTwitter import scrapTwProfile
+from .serializers import Twitter_Tweet_Serializer
 from .serializers import Twitter_User_Serializer
-import time
 
 
 @api_view(['GET'])
@@ -46,8 +46,6 @@ def twuser_detail(request, username, format=None):
         except Twitter_User.DoesNotExist:
             user =  scrapTwProfile(username)
             if(user):
-                user.created_date=user.updated_date =  time.strftime("%d-%m-%Y")
-                user.save()
                 serializer = Twitter_User_Serializer(user)
                 return Response({'message' : 'Profile scrapped and saved successfuly in the database.',
                                  'data':serializer.data},
@@ -57,32 +55,46 @@ def twuser_detail(request, username, format=None):
         
         return Response(status=status.HTTP_500_INTERNAL_ERROR)
 
-def tw_form(request):
-    if request.method == "POST":
-        form = TwForm(request.POST)
-        if form.is_valid(): 
-            name = form.cleaned_data.get('username')
-            obj = Twitter_User.objects.filter(username=name)
-            print(obj != None)
-            if (obj != None):
-                if len(obj) == 0:
-                    user =  scrapTwProfile(name)
-                    if(user):
-                        user.save()
-                        messages.add_message(request, messages.SUCCESS, 'Profile scrapped and saved successfuly in the database.')
-                        return render(request, 'scrapAPI/twUserDetails.html', {'user': user})
-                    else:
-                        messages.add_message(request, messages.ERROR, 'Username not found or HTTP/URL error has occured')
-                        return render(request, 'scrapAPI/twForm.html', {'form': form})
-                else:
-                    messages.add_message(request, messages.INFO, 'User exists already in the database.')
-                    return render(request, 'scrapAPI/twUserDetails.html', {'user': obj[0]})
-            else:
-                messages.add_message(request, messages.ERROR, 'An Error has occured')
-                return render(request, 'scrapAPI/twForm.html', {'form': form})
-        else:
-            return render(request, 'scrapAPI/twForm.html', {'form': form})
-    else:
-        form = TwForm()
-        return render(request, 'scrapAPI/twForm.html', {'form': form})
+@api_view(['GET', 'POST'])
+def twuser_tweets(request, username, format=None):
     
+    if request.method == 'GET':
+        try:
+            user = Twitter_User.objects.get(username__iexact=username)
+            if(user != None):
+                try:
+                    tweets = Twitter_Tweet.objects.filter(username=username.lower())
+                    serializer = Twitter_Tweet_Serializer(tweets, many=True)
+                    return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+                except Twitter_Tweet.DoesNotExist:
+                    return Response({'message' : 'No Tweets found in DB by this Username'},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Twitter_User.DoesNotExist:
+            return Response({'message' : 'Username does not exist in DB, Please scrap User Profile First'},
+                            status=status.HTTP_404_NOT_FOUND)
+   
+    elif request.method == 'POST':
+        try:
+            user = Twitter_User.objects.get(username__iexact=username)
+            if(user != None):
+                try:
+                    Twitter_Tweet.objects.filter(username=username.lower()).delete()
+                    tweets = getLatestTweets(user,[],0)
+                    if(len(tweets)>0):
+                        serializer = Twitter_Tweet_Serializer(tweets, many=True)
+                        return Response({'tweets retrieved':len(tweets),
+                                        'oldest tweet':tweets[-1].created_at,
+                                        'newest tweet':tweets[0].created_at,
+                                        'data':serializer.data}, 
+                                        status=status.HTTP_200_OK)
+                    else:
+                        return Response({'message' : 'No Tweets posted by this Username'},
+                            status=status.HTTP_404_NOT_FOUND)
+        
+                    
+                except Twitter_Tweet.DoesNotExist:
+                    return Response({'message' : 'No Tweets found in DB by this Username'},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Twitter_User.DoesNotExist:
+            return Response({'message' : 'Username does not exist in DB, Please scrap User Profile First'},
+                            status=status.HTTP_404_NOT_FOUND)
